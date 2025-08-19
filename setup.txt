@@ -1,0 +1,37 @@
+Notes
+
+1) Install deps (Windows / macOS / Linux):
+   python -m venv .venv
+   .venv\Scripts\activate  # Windows
+   # or source .venv/bin/activate on macOS/Linux
+   pip install --upgrade pip
+   pip install customtkinter sounddevice soundfile numpy faster-whisper ollama
+
+2) Install & run Ollama:
+
+   https://ollama.com/download
+
+   ollama serve
+   ollama pull llama3.1:8b 
+
+3) Install Piper & voice:
+
+   https://github.com/OHF-Voice/piper1-gpl
+   https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/API_PYTHON.md
+   https://rhasspy.github.io/piper-samples/
+
+   - Download a voice .onnx file (e.g., python -m piper.download_voices en_GB-cori-high)
+
+4) Run app:
+   python main.py
+
+5) Build .exe (Windows):
+   pip install pyinstaller
+   pyinstaller --noconfirm --onefile --windowed --name SpeakingChat main.py
+   # Put piper.exe and your .onnx voice next to SpeakingChat.exe if not on PATH.
+
+Environment overrides (optional):
+- OLLAMA_MODEL (default 'llama3.1:8b')
+- WHISPER_MODEL (default 'medium')  # tiny/base/small/medium/large-v3
+- PIPER_MODEL (path to voice .onnx)
+
