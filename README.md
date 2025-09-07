@@ -19,7 +19,7 @@ No internet required after setup. Everything runs **fully local** on your comput
 
 1) Install deps (Windows)
 ```
-   pip install customtkinter sounddevice soundfile numpy faster-whisper ollama
+pip install customtkinter sounddevice soundfile numpy faster-whisper ollama
 ```
 
 
@@ -28,8 +28,8 @@ No internet required after setup. Everything runs **fully local** on your comput
 [Download Ollama](https://ollama.com/download)  
 [Ollama API Docs](https://github.com/ollama/ollama/blob/main/docs/api.md)  
 ```
-   ollama serve
-   ollama pull llama3.1:8b
+ollama serve
+ollama pull llama3.1:8b
 ```
 
 
