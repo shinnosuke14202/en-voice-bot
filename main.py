@@ -6,7 +6,7 @@ from datetime import datetime
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
 
-from config import DEFAULT_OLLAMA_MODEL, DEFAULT_PIPER_MODEL, DEFAULT_WHISPER_MODEL
+from config import DEFAULT_OLLAMA_MODEL, DEFAULT_PIPER_MODEL, DEFAULT_WHISPER_MODEL, OLLAMA_MODELs
 from clazz import LocalChat, PiperTTS, Recorder, Transcriber
 
 
@@ -14,10 +14,10 @@ from clazz import LocalChat, PiperTTS, Recorder, Transcriber
 class SpeakingApp(ctk.CTk):
     def __init__(self):
         super().__init__()
-        ctk.set_appearance_mode("system")  # or "dark"/"light"
-        ctk.set_default_color_theme("blue")
+        ctk.set_appearance_mode("light")  # light/dark/system
+        ctk.set_default_color_theme("./themes/sakura.json")
 
-        self.title("Local Speaking Chat (Ollama + Whisper + Piper)")
+        self.title("Sakura Bot")
         self.geometry("900x650")
 
         # State
@@ -27,70 +27,132 @@ class SpeakingApp(ctk.CTk):
         self.chat = LocalChat(DEFAULT_OLLAMA_MODEL)
         self.last_reply_text = ""
         self.recording = False
+        self.isTyping = False
 
         # Layout grid
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(3, weight=1)
+        self.grid_rowconfigure(2, weight=2)
 
         # Settings frame
         self.settings_frame = ctk.CTkFrame(self)
         self.settings_frame.grid(
-            row=0, column=0, sticky="ew", padx=10, pady=10)
-        self.settings_frame.grid_columnconfigure((1, 3, 5), weight=1)
+            row=0,
+            column=0,
+            padx=10,
+            pady=10,
+            sticky="ew",
+        )
+        self.settings_frame.grid_columnconfigure(
+            (1, 3, 5),
+            weight=1
+        )
 
         ctk.CTkLabel(self.settings_frame, text="Ollama model").grid(
             row=0, column=0, padx=6, pady=6)
-        self.ollama_entry = ctk.CTkEntry(self.settings_frame)
-        self.ollama_entry.insert(0, DEFAULT_OLLAMA_MODEL)
-        self.ollama_entry.grid(row=0, column=1, sticky="ew", padx=6, pady=6)
+
+        def optionmenu_callback(choice):
+            self.chat.run(choice)
+
+        self.ollama_model = ctk.StringVar(value=DEFAULT_OLLAMA_MODEL)
+        optionmenu = ctk.CTkOptionMenu(
+            self.settings_frame,
+            values=OLLAMA_MODELs,
+            variable=self.ollama_model,
+            command=optionmenu_callback,
+        )
+        optionmenu.grid(row=0, column=1, padx=6, pady=6)
+        optionmenu.set(DEFAULT_OLLAMA_MODEL)
+
         self.test_llm_btn = ctk.CTkButton(
-            self.settings_frame, text="Test LLM", command=self.on_test_llm)
+            self.settings_frame,
+            text="Test LLM",
+            command=self.on_test_llm
+        )
         self.test_llm_btn.grid(row=0, column=2, padx=6, pady=6)
 
-        ctk.CTkLabel(self.settings_frame, text="Whisper model").grid(
-            row=0, column=3, padx=6, pady=6)
+        ctk.CTkLabel(
+            self.settings_frame,
+            text="Whisper model"
+        ).grid(
+            row=0, column=3, padx=6, pady=6
+        )
         self.whisper_entry = ctk.CTkEntry(self.settings_frame)
         self.whisper_entry.insert(0, DEFAULT_WHISPER_MODEL)
         self.whisper_entry.grid(row=0, column=4, sticky="ew", padx=6, pady=6)
+
         self.reload_whisper_btn = ctk.CTkButton(
-            self.settings_frame, text="Reload Whisper", command=self.on_reload_whisper)
+            self.settings_frame,
+            text="Reload Whisper",
+            command=self.on_reload_whisper
+        )
         self.reload_whisper_btn.grid(row=0, column=5, padx=6, pady=6)
 
-        ctk.CTkLabel(self.settings_frame, text="Piper voice .onnx").grid(
-            row=1, column=0, padx=6, pady=6)
+        ctk.CTkLabel(
+            self.settings_frame,
+            text="Piper voice .onnx"
+        ).grid(
+            row=1, column=0, padx=6, pady=6
+        )
         self.piper_entry = ctk.CTkEntry(self.settings_frame)
         self.piper_entry.insert(0, DEFAULT_PIPER_MODEL)
-        self.piper_entry.grid(row=1, column=1, columnspan=4,
-                              sticky="ew", padx=6, pady=6)
+        self.piper_entry.grid(
+            row=1,
+            column=1,
+            columnspan=4, 
+            sticky="ew", 
+            padx=6, 
+            pady=6
+        )
         self.piper_browse_btn = ctk.CTkButton(
-            self.settings_frame, text="Browse", command=self.on_browse_voice)
+            self.settings_frame, 
+            text="Browse", 
+            command=self.on_browse_voice
+        )
         self.piper_browse_btn.grid(row=1, column=5, padx=6, pady=6)
 
         # Controls frame
         self.ctrl_frame = ctk.CTkFrame(self)
-        self.ctrl_frame.grid(row=1, column=0, sticky="ew",
-                             padx=10, pady=(0, 10))
+        self.ctrl_frame.grid(
+            row=1, column=0, sticky="ew",
+            padx=10, pady=(0, 10)
+        )
         self.ctrl_frame.grid_columnconfigure(3, weight=1)
 
         self.rec_btn = ctk.CTkButton(
-            self.ctrl_frame, text="Start Recording", fg_color="#2e7d32", command=self.on_start_record)
+            self.ctrl_frame,
+            text="Start Recording",
+            command=self.on_start_record,
+        )
         self.rec_btn.grid(row=0, column=0, padx=6, pady=8)
-        self.stop_btn = ctk.CTkButton(self.ctrl_frame, text="Stop Recording",
-                                      fg_color="#c62828", command=self.on_stop_record, state="disabled")
+
+        self.stop_btn = ctk.CTkButton(
+            self.ctrl_frame,
+            text="Stop Recording",
+            command=self.on_stop_record,
+            state="disabled",
+        )
         self.stop_btn.grid(row=0, column=1, padx=6, pady=8)
+
         self.repeat_btn = ctk.CTkButton(
-            self.ctrl_frame, text="Speak Last Reply", command=self.on_repeat, state="disabled")
+            self.ctrl_frame, text="Speak Last Reply", 
+            command=self.on_repeat, state="disabled"
+        )
         self.repeat_btn.grid(row=0, column=2, padx=6, pady=8)
 
         # Chat frame
         self.chat_frame = ctk.CTkFrame(self)
         self.chat_frame.grid(
-            row=2, column=0, sticky="nsew", padx=10, pady=(0, 10))
+            row=2, column=0, sticky="nsew", 
+            padx=10, pady=(0, 10)
+        )
         self.chat_frame.grid_columnconfigure(0, weight=1)
         self.chat_frame.grid_rowconfigure(0, weight=1)
 
         self.chat_box = ctk.CTkTextbox(
-            self.chat_frame, width=840, height=380, wrap="word")
+            self.chat_frame, 
+            wrap="word"
+        )
         self.chat_box.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
         self.chat_box.configure(state="disabled")
 
@@ -106,6 +168,10 @@ class SpeakingApp(ctk.CTk):
             self.input_frame, text="Send", command=self.on_send)
         self.send_btn.grid(row=0, column=1, padx=6, pady=6)
 
+        self.bind("<Return>", lambda _: self.on_send())  
+
+        self.bind("<space>", self.on_space_key)
+
         # Status bar
         self.status_var = ctk.StringVar(value="Ready")
         self.status = ctk.CTkLabel(
@@ -113,6 +179,15 @@ class SpeakingApp(ctk.CTk):
         self.status.grid(row=4, column=0, sticky="ew", padx=10, pady=(0, 10))
 
     # ---------- Helpers ---------- #
+    def on_space_key(self, event):
+        if str(self.focus_get()) == ".!ctkframe4.!ctkentry.!entry":
+            return 
+
+        if self.recording == False:
+            self.on_start_record()
+        else:
+            self.on_stop_record()
+
     def append_chat(self, role, text):
         ts = datetime.now().strftime("%H:%M")
         self.chat_box.configure(state="normal")
@@ -134,9 +209,10 @@ class SpeakingApp(ctk.CTk):
 
     def on_test_llm(self):
         try:
-            self.chat.model = self.ollama_entry.get().strip() or DEFAULT_OLLAMA_MODEL
+            self.chat.model = self.ollama_model.get().strip() or DEFAULT_OLLAMA_MODEL
             reply = self.chat.ask(
-                "Say 'Ready to chat.' in one short sentence.")
+                "Say 'Ready to chat.' in one short sentence."
+            )
             self.append_chat("Assistant", reply)
             self.last_reply_text = reply
             self.repeat_btn.configure(state="normal")
@@ -182,11 +258,11 @@ class SpeakingApp(ctk.CTk):
                     self.set_status("No audio captured")
                     return
                 self.set_status("Transcribing…")
-                lang, text = self.transcriber.transcribe(wav_in)
+                lang, text = self.transcriber.transcribe(wav_in, language="en")
                 self.append_chat("You", text)
 
                 self.set_status("Thinking…")
-                self.chat.model = self.ollama_entry.get().strip() or DEFAULT_OLLAMA_MODEL
+                self.chat.model = self.ollama_model.get().strip() or DEFAULT_OLLAMA_MODEL
                 reply = self.chat.ask(text)
                 self.append_chat("Assistant", reply)
                 self.last_reply_text = reply
@@ -230,7 +306,7 @@ class SpeakingApp(ctk.CTk):
         def _chat_and_speak():
             try:
                 self.set_status("Thinking…")
-                self.chat.model = self.ollama_entry.get().strip() or DEFAULT_OLLAMA_MODEL
+                self.chat.model = self.ollama_model.get().strip() or DEFAULT_OLLAMA_MODEL
                 reply = self.chat.ask(text)
                 self.append_chat("Assistant", reply)
                 self.last_reply_text = reply

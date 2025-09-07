@@ -1,6 +1,7 @@
 import os
 
-DEFAULT_OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.1:8b")
+DEFAULT_OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2:3b")
+OLLAMA_MODELs = os.environ.get("OLLAMA_MODELS", ["llama3.2:3b", "llama3.1:8b"])
 DEFAULT_WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "medium")
 DEFAULT_PIPER_MODEL = os.environ.get("PIPER_MODEL", "./models/en_GB-cori-high.onnx")
 DEFAULT_SAMPLE_RATE = 16000
