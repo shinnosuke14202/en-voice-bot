@@ -1,0 +1,9 @@
+customtkinter==5.2.2
+faster_whisper==1.2.0
+numpy==2.2.6
+ollama==0.5.3
+Pillow==11.3.0
+sounddevice==0.5.2
+soundfile==0.13.1
+torch==2.8.0+cu126
+# Python==3.11.8

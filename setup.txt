@@ -26,13 +26,7 @@ Notes
 4) Run app:
    python main.py
 
-5) Build .exe (Windows):
-   pip install pyinstaller
-   pyinstaller --noconfirm --onefile --windowed --name SpeakingChat main.py
-   # Put piper.exe and your .onnx voice next to SpeakingChat.exe if not on PATH.
-
 Environment overrides (optional):
 - OLLAMA_MODEL (default 'llama3.1:8b')
 - WHISPER_MODEL (default 'medium')  # tiny/base/small/medium/large-v3
-- PIPER_MODEL (path to voice .onnx)
-
+- PIPER_MODEL (path to voice .onnx) # save .onnx and .json in ./models/
